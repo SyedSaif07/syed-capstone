@@ -1,0 +1,1 @@
+The OWASP Top Ten is a list of the ten most critical web application security risks, aimed at raising awareness and providing guidance for developers and organizations to improve their security posture.
