@@ -1,0 +1,21 @@
+text
+What is retrieval-augmented generation in one sentence?
+Name three real-world uses of vector databases.
+Why might an LLM produce confident but wrong answers?
+What is a Pydantic BaseModel and how does it differ from a dataclass?
+Explain async and await in Python in two sentences.
+What's the difference between asyncio.gather and a sequential await loop?
+How does exponential backoff differ from constant-interval retry?
+Why is JSON-formatted logging better than plain text for production?
+What does the @app.post decorator do in FastAPI?
+What is the role of a foreign key in a SQLite schema?
+Why should API keys be loaded from environment variables, not hardcoded?
+What are the main steps in a typical RAG pipeline?
+What does HTTP status code 422 mean?
+Why do we use parameterised SQL queries instead of f-string concatenation?
+What is the difference between SELECT and INSERT in SQL?
+Explain what dependency injection means in software design.
+What is the purpose of a unit test?
+How does a Python virtual environment help with package management?
+What does "rate limiting" mean in the context of APIs?
+Name three reasons an LLM might hallucinate.
