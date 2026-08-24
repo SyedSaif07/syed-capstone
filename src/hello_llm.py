@@ -11,7 +11,7 @@ from openai import OpenAI
 load_dotenv()
 # Create the OpenAI client — it reads OPENAI_API_KEY from the
 #environment automatically.
-client = OpenAI()
+client = OpenAI(base_url="https://openai.vocareum.com/v1")
 
 def ask(question: str) -> str:
     """Send one question to the LLM and return the answer text."""
