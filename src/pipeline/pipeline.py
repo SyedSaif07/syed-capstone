@@ -17,6 +17,8 @@ import asyncio
 import json
 import logging
 import sys
+import os
+from pathlib import Path
 import time
 from .logging_config import get_logger
 from .settings import Settings, RunSummary
@@ -33,7 +35,11 @@ else:
     from openai import AsyncOpenAI
     from pydantic import BaseModel
 
-    load_dotenv()
+
+
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    load_dotenv(BASE_DIR / ".env")
+
     _client = AsyncOpenAI(base_url="https://openai.vocareum.com/v1")
 
     class Question(BaseModel):
