@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+.idea/
 # Secrets — never commit these
 .env
 .env.local

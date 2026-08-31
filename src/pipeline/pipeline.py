@@ -13,43 +13,40 @@ the `from fake_llm import ...` import below to `from .fake_llm import ...`.
 The completed reference is at <cohort-repo>/week2/reference/pipeline_reference.py.
 """
 from __future__ import annotations
+
 import asyncio
+import csv
 import json
-import logging
-import sys
-import os
-from pathlib import Path
 import time
+from pathlib import Path
+
 from .logging_config import get_logger
 from .settings import Settings, RunSummary
-import csv
-
-
 
 _settings_for_import = Settings()
 
 if _settings_for_import.use_fake:
-    from .fake_llm import Question, Answer, fake_ask_llm, FakeLLMError
+    from .fake_llm import Question, Answer, fake_ask_llm
 else:
     from dotenv import load_dotenv
     from openai import AsyncOpenAI
     from pydantic import BaseModel
-
-
 
     BASE_DIR = Path(__file__).resolve().parent.parent
     load_dotenv(BASE_DIR / ".env")
 
     _client = AsyncOpenAI(base_url="https://openai.vocareum.com/v1")
 
+
     class Question(BaseModel):
         text: str
 
+
     class Answer(BaseModel):
         question: str
-        text:     str
+        text: str
         cost_usd: float
-        retries:  int = 0
+        retries: int = 0
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Step 5 (sub-step 2e) — structured (JSON) logging
@@ -62,12 +59,12 @@ else:
 # ─────────────────────────────────────────────────────────────────────────────
 log = get_logger()
 
+
 def load_questions(path: str | Path = "data/questions_small.csv") -> list[Question]:
     """Read questions from a CSV with a `text` column."""
     with open(path, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     return [Question(text=row["text"]) for row in rows if row.get("text")]
-
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -82,11 +79,10 @@ async def ask_llm(q: Question, fail_rate: float = 0.0) -> Answer:
             model=_settings_for_import.model,
             messages=[{"role": "user", "content": q.text}],
         )
-        ans = Answer(
-            question=q.text,
-            text=resp.choices[0].message.content,
-            cost_usd=0.0001,                  # real cost-from-usage lands in W25
-        )
+        ans = Answer(question=q.text,
+                     text=resp.choices[0].message.content,
+                     cost_usd=0.0001,  # real cost-from-usage lands in W25
+                     )
     log.info(f"asked: {q.text[:40]}")
     return ans
 
@@ -95,7 +91,7 @@ async def ask_llm(q: Question, fail_rate: float = 0.0) -> Answer:
 # 2c — retry wrapper
 # ─────────────────────────────────────────────────────────────────────────────
 async def ask_llm_with_retry(
-    q: Question, tries: int = 3, fail_rate: float = 0.0
+        q: Question, tries: int = 3, fail_rate: float = 0.0
 ) -> Answer:
     """Retry up to `tries` times. Wait 1 s, 2 s, 4 s between attempts."""
     for attempt in range(tries):
@@ -108,7 +104,7 @@ async def ask_llm_with_retry(
                 raise
             log.warning(f"retry {attempt + 1} for: {q.text[:40]} ({exc})")
             await asyncio.sleep(2 ** attempt)
-    raise RuntimeError("unreachable")          # pragma: no cover
+    raise RuntimeError("unreachable")  # pragma: no cover
     # raise NotImplementedError("Step 3 — wrap ask_llm with retry + exponential backoff")
 
 
@@ -116,7 +112,7 @@ async def ask_llm_with_retry(
 # 2d — batch runner
 # ─────────────────────────────────────────────────────────────────────────────
 async def run_batch(
-    questions: list[Question], fail_rate: float = 0.0
+        questions: list[Question], fail_rate: float = 0.0
 ) -> list[Answer]:
     """Fire every question in parallel via asyncio.gather (with retries)."""
     tasks = [ask_llm_with_retry(q, fail_rate=fail_rate) for q in questions]
@@ -124,43 +120,42 @@ async def run_batch(
     # raise NotImplementedError("Step 4 — build the tasks list and gather them")
 
 
-
 async def run_in_batches(
-    questions: list[Question],
-    batch_size: int = 5,
-    fail_rate: float = 0.0,
+        questions: list[Question],
+        batch_size: int = 5,
+        fail_rate: float = 0.0,
 ) -> list[Answer]:
     """Fire questions in chunks of `batch_size`, with a 100 ms pause between batches."""
     out: list[Answer] = []
     for i in range(0, len(questions), batch_size):
-        chunk = questions[i : i + batch_size]
+        chunk = questions[i: i + batch_size]
         log.info(f"batch {i // batch_size + 1}: {len(chunk)} questions")
         batch_answers = await asyncio.gather(
             *(ask_llm_with_retry(q, fail_rate=fail_rate) for q in chunk)
         )
         out.extend(batch_answers)
-        await asyncio.sleep(0.1)              # gentle pace between batches
+        await asyncio.sleep(0.1)  # gentle pace between batches
     return out
 
 
 def summarise_run(
-    answers: list[Answer],
-    *,
-    started_at: float,
-    elapsed: float,
-    fail_rate: float,
-    use_fake: bool,
+        answers: list[Answer],
+        *,
+        started_at: float,
+        elapsed: float,
+        fail_rate: float,
+        use_fake: bool,
 ) -> RunSummary:
     """Roll a list of Answers + wall-clock data into a RunSummary."""
     return RunSummary(
-        started_at      = started_at,
-        elapsed_seconds = elapsed,
-        n_questions     = len(answers),
-        n_succeeded     = len(answers),
-        n_retries_total = sum(a.retries  for a in answers),
-        total_cost_usd  = sum(a.cost_usd for a in answers),
-        fail_rate       = fail_rate,
-        use_fake        = use_fake,
+        started_at=started_at,
+        elapsed_seconds=elapsed,
+        n_questions=len(answers),
+        n_succeeded=len(answers),
+        n_retries_total=sum(a.retries for a in answers),
+        total_cost_usd=sum(a.cost_usd for a in answers),
+        fail_rate=fail_rate,
+        use_fake=use_fake,
     )
 
 
@@ -193,10 +188,10 @@ if __name__ == "__main__":
 
     summary = summarise_run(
         answers,
-        started_at = started,
-        elapsed    = elapsed,
-        fail_rate  = settings.fail_rate,
-        use_fake   = settings.use_fake,
+        started_at=started,
+        elapsed=elapsed,
+        fail_rate=settings.fail_rate,
+        use_fake=settings.use_fake,
     )
     log.info(f"summary: {summary.model_dump_json()}")
 
@@ -214,6 +209,7 @@ if __name__ == "__main__":
     # Deferred import: store.py imports Answer from this module; top-level import
     # would cause a circular import.
     from .store import connect, write_run, write_answers
+
     with connect(settings.results_db) as con:
         run_id = write_run(con, summary)
         n = write_answers(con, run_id, answers)
@@ -248,4 +244,3 @@ if __name__ == "__main__":
     # print(f'wall-clock: {elapsed:.2f}s')
     # for a in answers:
     #     print(f'- {a.text[:60]}')
-

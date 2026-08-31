@@ -255,3 +255,17 @@
 {"ts": 1787825438.504, "level": "INFO", "msg": "asked: What is the leave policy?", "logger": "pipeline"}
 {"ts": 1787829688.543, "level": "INFO", "msg": "ask  question='What is the leave policy?'", "logger": "pipeline"}
 {"ts": 1787829695.082, "level": "INFO", "msg": "asked: What is the leave policy?", "logger": "pipeline"}
+{"ts": 1787900258.552, "level": "INFO", "msg": "ask  question='What is leave policy?'", "logger": "pipeline"}
+{"ts": 1787900265.784, "level": "INFO", "msg": "asked: What is leave policy?", "logger": "pipeline"}
+{"ts": 1787917301.377, "level": "INFO", "msg": "ask  question=' \"How does the procurement approval process work and who needs to sign off?\"'", "logger": "pipeline"}
+{"ts": 1787917308.659, "level": "INFO", "msg": "asked:  \"How does the procurement approval proc", "logger": "pipeline"}
+{"ts": 1787917339.521, "level": "INFO", "msg": "ask  question=\"What's the policy on bringing pets to the office?\"", "logger": "pipeline"}
+{"ts": 1787917343.571, "level": "INFO", "msg": "asked: What's the policy on bringing pets to th", "logger": "pipeline"}
+{"ts": 1788162500.422, "level": "INFO", "msg": "asked: What is RAG?", "logger": "pipeline"}
+{"ts": 1788162704.584, "level": "INFO", "msg": "asked: What is RAG?", "logger": "pipeline"}
+{"ts": 1788172754.216, "level": "INFO", "msg": "asked: What is RAG?", "logger": "pipeline"}
+{"ts": 1788172754.218, "level": "WARNING", "msg": "retry 1 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1788172754.218, "level": "WARNING", "msg": "retry 2 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1788172770.348, "level": "INFO", "msg": "asked: What is RAG?", "logger": "pipeline"}
+{"ts": 1788172770.35, "level": "WARNING", "msg": "retry 1 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1788172770.35, "level": "WARNING", "msg": "retry 2 for: What is RAG? (simulated)", "logger": "pipeline"}
