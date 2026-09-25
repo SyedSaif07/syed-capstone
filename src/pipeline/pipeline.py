@@ -19,8 +19,11 @@ import csv
 import json
 import time
 from pathlib import Path
+from typing import AsyncIterator
 
+from .cost import compute_cost_usd
 from .logging_config import get_logger
+from .models import Answer, Question
 from .settings import Settings, RunSummary
 
 _settings_for_import = Settings()
@@ -30,23 +33,54 @@ if _settings_for_import.use_fake:
 else:
     from dotenv import load_dotenv
     from openai import AsyncOpenAI
-    from pydantic import BaseModel
 
     BASE_DIR = Path(__file__).resolve().parent.parent
     load_dotenv(BASE_DIR / ".env")
 
     _client = AsyncOpenAI(base_url="https://openai.vocareum.com/v1")
 
+    # class Question(BaseModel):
+    #     text: str
+    #
+    #
+    # class Answer(BaseModel):
+    #     question: str
+    #     text: str
+    #     cost_usd: float
+    #     retries: int = 0
 
-    class Question(BaseModel):
-        text: str
-
-
-    class Answer(BaseModel):
-        question: str
-        text: str
-        cost_usd: float
-        retries: int = 0
+# ─── Tool schema for structured outputs ─────────────────────────────────────
+ANSWER_TOOL: dict = {
+    "type": "function",
+    "function": {
+        "name": "answer_question",
+        "description": (
+            "Return a structured answer with content, confidence, and sources."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "description": "The answer in 2-4 sentences.",
+                },
+                "confidence": {
+                    "type": "number",
+                    "description": "How confident you are in the answer, 0.0 to 1.0.",
+                },
+                "sources": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": (
+                        "Source identifiers or URLs you used. Empty list is fine "
+                        "if you used general knowledge."
+                    ),
+                },
+            },
+            "required": ["content", "confidence", "sources"],
+        },
+    },
+}
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Step 5 (sub-step 2e) — structured (JSON) logging
@@ -77,14 +111,77 @@ async def ask_llm(q: Question, fail_rate: float = 0.0) -> Answer:
     else:
         resp = await _client.chat.completions.create(
             model=_settings_for_import.model,
-            messages=[{"role": "user", "content": q.text}],
+            messages=[{"role": "user", "content": q.question}],
+            tools=[ANSWER_TOOL],
+            tool_choice={"type": "function", "function": {"name": "answer_question"}}
         )
-        ans = Answer(question=q.text,
-                     text=resp.choices[0].message.content,
-                     cost_usd=0.0001,  # real cost-from-usage lands in W25
-                     )
+        # ans = Answer(question=q.text,
+        #              text=resp.choices[0].message.content,
+        #              cost_usd=0.0001,  # real cost-from-usage lands in W25
+        #              )
+        # Parse the tool call's structured arguments.
+        tool_calls = resp.choices[0].message.tool_calls or []
+        if not tool_calls:
+            # Defensive — should not happen because tool_choice forces it,
+            # but if a provider misbehaves we want a clear error.
+            raise RuntimeError("LLM did not call the answer_question tool")
+        args_json = tool_calls[0].function.arguments
+        args = json.loads(args_json)
+
+        # Compute real cost from usage.
+        usage = resp.usage
+        cost = compute_cost_usd(
+            _settings_for_import.model,
+            usage.prompt_tokens if usage else 0,
+            usage.completion_tokens if usage else 0,
+        )
+
+        return Answer(
+            content=args["content"],
+            confidence=args["confidence"],
+            sources=args.get("sources", []),
+            cost_usd=cost,
+            retries=0,
+            schema_version="v1",
+        )
     log.info(f"asked: {q.text[:40]}")
     return ans
+
+
+# ─── Streaming endpoint (Step 2a, 2b) ───────────────────────────────────────
+async def stream_answer(question: str, settings: Settings | None = None) -> AsyncIterator[str]:
+    """Yield content tokens as they arrive from the LLM.
+
+    W3 simulated this with asyncio.sleep. W4 replaces with real chunks.
+    """
+    settings = settings or Settings()
+
+    if settings.use_fake:
+        # Offline path — yield words slowly. Kept for tests.
+        full = await fake_ask_llm(question)
+        for word in full.split(" "):
+            await asyncio.sleep(0.05)
+            yield word + " "
+        return
+
+    client = AsyncOpenAI(base_url="https://openai.vocareum.com/v1")
+
+    # TODO Step 2a — call client.chat.completions.create with stream=True:
+    stream = await client.chat.completions.create(
+        model=settings.model,
+        messages=[{"role": "user", "content": question}],
+        stream=True,
+    )
+    #
+    # TODO Step 2b — iterate and yield:
+    async for chunk in stream:
+        if not chunk.choices:
+            continue
+        delta = chunk.choices[0].delta
+        if delta.content:
+            yield delta.content
+
+    # raise NotImplementedError("Steps 2a, 2b — fill these in")
 
 
 # ─────────────────────────────────────────────────────────────────────────────

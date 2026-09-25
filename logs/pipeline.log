@@ -269,3 +269,20 @@
 {"ts": 1788172770.348, "level": "INFO", "msg": "asked: What is RAG?", "logger": "pipeline"}
 {"ts": 1788172770.35, "level": "WARNING", "msg": "retry 1 for: What is RAG? (simulated)", "logger": "pipeline"}
 {"ts": 1788172770.35, "level": "WARNING", "msg": "retry 2 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1789216149.059, "level": "INFO", "msg": "asked: What is RAG?", "logger": "pipeline"}
+{"ts": 1789216149.06, "level": "WARNING", "msg": "retry 1 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1789216149.061, "level": "WARNING", "msg": "retry 2 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1789661047.024, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661112.589, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661134.489, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661161.917, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661283.054, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661315.262, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661358.595, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661411.061, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661522.564, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661590.708, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789661660.878, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789663614.427, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789663689.586, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1789664127.677, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}

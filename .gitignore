@@ -5,7 +5,7 @@ __pycache__/
 venv/
 .idea/
 # Secrets — never commit these
-.env
+src/.env
 .env.local
 *.key
 # OS
