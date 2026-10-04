@@ -286,3 +286,8 @@
 {"ts": 1789663614.427, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
 {"ts": 1789663689.586, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
 {"ts": 1789664127.677, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1790328642.551, "level": "INFO", "msg": "asked: What is RAG?", "logger": "pipeline"}
+{"ts": 1790328642.553, "level": "WARNING", "msg": "retry 1 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1790328642.554, "level": "WARNING", "msg": "retry 2 for: What is RAG? (simulated)", "logger": "pipeline"}
+{"ts": 1790328722.421, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}
+{"ts": 1790328894.057, "level": "INFO", "msg": "ask_batched  question='What is RAG, in two sentences?'", "logger": "pipeline"}

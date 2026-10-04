@@ -9,7 +9,7 @@ Run with:
     pytest tests/test_api.py -v
 """
 from fastapi.testclient import TestClient
-from src.api import app
+from src.api.main import app
 
 
 client = TestClient(app)
