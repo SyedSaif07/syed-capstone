@@ -12,6 +12,8 @@ are locked in ADR 0002. Internally we delegate to the W2 pipeline's
 The translation happens inside each endpoint.
 """
 
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -23,6 +25,7 @@ from src.pipeline.pipeline import Question as _PipelineQuestion
 from src.pipeline.pipeline import ask_llm as _pipeline_ask_llm
 from src.pipeline.pipeline import stream_answer
 from src.pipeline.settings import Settings
+from src.rag.naive_rag import ask_rag, load_index
 
 log = get_logger()
 _settings = Settings()
@@ -74,18 +77,36 @@ app = FastAPI(
 # ─────────────────────────────────────────────────────────────────────────────
 
 # TODO 1c — add /ask_batched here
-@app.post("/ask_batched", response_model=_PipelineAnswer)
-async def ask_batched(q: Question) -> _PipelineAnswer:
-    """Non-streaming. Returns the full Answer in a single JSON body."""
-    log.info("ask_batched  question=%r", q.question[:80])
-    pipeline_q = _PipelineQuestion(question=q.question)
-    pipeline_ans = await _pipeline_ask_llm(pipeline_q)
-    # return Answer(
-    #     content=pipeline_ans.content,
-    #     cost_usd=pipeline_ans.cost_usd,
-    #     retries=pipeline_ans.retries,
-    # )
-    return pipeline_ans
+# @app.post("/ask_batched", response_model=_PipelineAnswer)
+# async def ask_batched(q: Question) -> _PipelineAnswer:
+#     """Non-streaming. Returns the full Answer in a single JSON body."""
+#     log.info("ask_batched  question=%r", q.question[:80])
+#     pipeline_q = _PipelineQuestion(question=q.question)
+#     pipeline_ans = await _pipeline_ask_llm(pipeline_q)
+#     # return Answer(
+#     #     content=pipeline_ans.content,
+#     #     cost_usd=pipeline_ans.cost_usd,
+#     #     retries=pipeline_ans.retries,
+#     # )
+#     return pipeline_ans
+
+
+
+
+# At module top, after `_settings = Settings()`:
+_index = load_index(Path("data/embeddings.json"))
+
+
+@app.post("/ask_batched", response_model=Answer)
+async def ask_batched(q: Question) -> Answer:
+    result = ask_rag(q.question, _index, _settings)  # ← W6: RAG call
+    answer = Answer(
+        content=result["answer"],
+        sources=result["sources"],
+        cost_usd=(result["tokens_in"] * 0.15 + result["tokens_out"] * 0.60) / 1_000_000,
+        # ... other fields as your W5 Answer schema requires
+    )
+    return answer
 
 
 # ─────────────────────────────────────────────────────────────────────────────
